@@ -1,20 +1,22 @@
 # Product
 
-## Why this project exists
-Ollama is a popular tool for running large language models locally. However, exposing Ollama APIs can pose security risks if not properly secured. This honeypot serves as a security monitoring tool to detect attempts to access or exploit Ollama instances.
+## Problem Statement
+Ollama is a popular tool for running LLMs locally. As its adoption grows, it becomes a target for attackers looking to exploit exposed API endpoints. Users need a way to detect if their exposed ports are being scanned or targeted by malicious actors seeking to use their compute resources or steal data.
 
-## Problems it solves
-- Detect unauthorized access attempts to Ollama APIs
-- Log suspicious activity for security analysis
-- Provide a decoy to divert attackers from real Ollama instances
-- Help in understanding attack patterns on AI/ML services
+## Solution
+`ollama_honeypot` is a lightweight Go application that mimics the Ollama API. It listens on the standard Ollama port (11434) and responds to common API requests (like generating text or listing models) with fake data. Crucially, it logs every request, capturing details about the attacker's intent, such as the model requested and the prompt used.
 
-## How it should work
-The honeypot runs an HTTP server on port 11434 that responds to API requests similar to Ollama. All requests are logged with details like IP, headers, body, etc. The responses mimic legitimate Ollama responses to avoid detection.
+## User Experience Goals
+1.  **Zero Config Start:** Ideally, the user can just run the binary and it starts listening on the default port.
+2.  **High Fidelity Deception:** The API responses should be realistic enough to keep automated scanners and simple scripts engaged.
+3.  **Clear Visibility:** Logs should be easy to read and parse, providing immediate insight into potential threats.
+4.  **Low Resource Usage:** As a honeypot, it should consume minimal system resources.
 
-## User experience goals
-- Easy to deploy and run
-- Minimal resource usage
-- Comprehensive logging
-- Configurable responses
-- Integration with security monitoring tools
+## Key Features
+-   **Mock API Endpoints:**
+    -   `GET /`: Health check/status.
+    -   `POST /api/generate`: Mimic text generation.
+    -   `POST /api/chat`: Mimic chat completion.
+    -   `GET /api/tags`: List fake available models.
+-   **Request Logging:** Capture IP, timestamp, endpoint, method, and request body (prompts).
+-   **Configuration:** Support for custom ports and logging preferences via environment variables or CLI flags.

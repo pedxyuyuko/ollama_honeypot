@@ -1,19 +1,17 @@
 # Context
 
 ## Current Work Focus
-Initializing the memory bank and setting up the basic honeypot structure. The project currently has a minimal implementation with only a root endpoint that returns a simple string response.
+The project is in the initial setup phase. The basic structure is in place with a `main.go` entry point and a `serve` command using Cobra and Gin. The immediate focus is on expanding the API endpoints to mimic Ollama's behavior and implementing the logging mechanism.
 
 ## Recent Changes
-- Initial project setup with basic CLI using Cobra
-- Basic HTTP server using Gin framework
-- Server listens on port 11434 (Ollama's default port)
-- Single endpoint "/" implemented
+- Initialized project structure.
+- Added `main.go` and `cmd/serve.go`.
+- Set up `go.mod` with dependencies (`gin`, `cobra`).
+- Initialized Memory Bank.
 
 ## Next Steps
-- Implement actual Ollama API endpoints (e.g., /api/generate, /api/chat, etc.)
-- Add comprehensive request logging (IP, headers, body, timestamps)
-- Add configurable response behaviors
-- Implement different response modes (e.g., mimic successful responses, error responses)
-- Add logging to files or external systems
-- Add configuration options (port, logging level, response types)
-- Add tests for the honeypot functionality
+1.  Implement `POST /api/generate` endpoint to mimic text generation.
+2.  Implement `POST /api/chat` endpoint to mimic chat completion.
+3.  Implement `GET /api/tags` endpoint to list fake models.
+4.  Add structured logging (JSON preferred) to capture request details (IP, prompt, model).
+5.  Add configuration support (env vars/flags) for port and logging options.

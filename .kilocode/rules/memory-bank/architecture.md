@@ -1,29 +1,25 @@
 # Architecture
 
 ## System Architecture
-The system is a simple HTTP server built with the Gin framework that listens on port 11434. It uses Cobra for CLI commands to provide a command-line interface.
+The application is a single binary written in Go. It functions as a CLI tool that starts an HTTP server.
+
+### Components
+1.  **CLI Interface (Cobra):** Handles command-line arguments, flags, and subcommands (e.g., `serve`).
+2.  **HTTP Server (Gin):** Handles incoming API requests, routing them to appropriate handlers.
+3.  **Honeypot Logic:**
+    -   **Mock Handlers:** Generate fake responses for Ollama API endpoints.
+    -   **Logger:** Intercepts requests and logs details (IP, payload) for analysis.
 
 ## Source Code Paths
-- main.go: Entry point that sets up the CLI using Cobra
-- cmd/serve.go: Implementation of the "serve" command that starts the HTTP server
-- go.mod: Defines the Go module and dependencies
+-   `main.go`: Application entry point. Initializes the root command.
+-   `cmd/`: Contains Cobra command definitions.
+    -   `cmd/serve.go`: Defines the `serve` command which starts the Gin server and defines routes.
 
 ## Key Technical Decisions
-- Go language chosen for its performance, simplicity, and strong concurrency support
-- Gin web framework selected for HTTP handling due to its high performance and ease of use
-- Cobra CLI library used for command-line interface due to its popularity and robustness in the Go ecosystem
-- Port 11434 chosen to match Ollama's default port for realistic honeypot behavior
+-   **Go:** Chosen for performance, single-binary deployment, and strong concurrency support.
+-   **Gin:** A high-performance HTTP web framework for Go. Used for routing and handling API requests.
+-   **Cobra:** A library for creating powerful modern CLI applications. Used for managing the application's commands and flags.
 
 ## Design Patterns
-- Command pattern implemented via Cobra for CLI structure
-- Handler pattern used for HTTP route definitions in Gin
-
-## Component Relationships
-- main.go imports and uses the cmd package
-- cmd/serve.go imports and uses Gin for creating and running the HTTP server
-- The serve command in cmd/serve.go sets up routes and starts the server
-
-## Critical Implementation Paths
-- Application startup: main.go -> cmd.Serve execution
-- Server initialization: cmd/serve.go Run function creates Gin router and starts listening
-- Request handling: Currently only handles GET requests to "/" with a simple response
+-   **Command Pattern:** Used by Cobra to structure the CLI application.
+-   **Middleware Pattern:** Gin middleware will be used for logging and potentially for other cross-cutting concerns like authentication (if added later) or rate limiting.

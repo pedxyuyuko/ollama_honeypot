@@ -1,28 +1,18 @@
 # Tech
 
 ## Technologies Used
-- Go 1.25.4
-- Gin web framework
-- Cobra CLI library
+-   **Language:** Go (v1.25.4)
+-   **Web Framework:** Gin (v1.11.0)
+-   **CLI Library:** Cobra (v1.10.1)
 
 ## Development Setup
-- Clone the repository
-- Ensure Go 1.25.4 or later is installed
-- Run `go mod tidy` to download dependencies
-- Build with `go build`
-- Run with `./ollama_honeypot serve`
+-   **Build:** Standard Go build system (`go build`).
+-   **Dependency Management:** Go Modules (`go.mod`).
 
 ## Technical Constraints
-- Must run on port 11434 to mimic Ollama
-- Should be lightweight and resource-efficient
-- No external database required (logs can be to stdout or files)
+-   **Port:** Defaults to 11434 (Ollama standard), but must be configurable.
+-   **Performance:** Must be lightweight to run alongside other services if needed.
 
 ## Dependencies
-- github.com/gin-gonic/gin v1.11.0
-- github.com/spf13/cobra v1.10.1
-- Numerous indirect dependencies for Gin and Go standard library enhancements
-
-## Tool Usage Patterns
-- VSCode with Go extension for development
-- Launch configuration in .vscode/launch.json for debugging the serve command
-- Standard Go build and run commands
+-   `github.com/gin-gonic/gin`: HTTP web framework.
+-   `github.com/spf13/cobra`: CLI application structure.

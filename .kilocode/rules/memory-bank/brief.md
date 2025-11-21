@@ -5,5 +5,7 @@ This project is an Ollama API honeypot designed to detect and log unauthorized o
 Key requirements:
 - Mimic Ollama API endpoints
 - Log all incoming requests
+- Capture unauth prompt and model
 - Run on default Ollama port (11434)
 - Provide basic CLI interface
+- Read config file .env or system env vars
