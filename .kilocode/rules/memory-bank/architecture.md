@@ -13,7 +13,8 @@ The application is a single binary written in Go. It functions as a CLI tool tha
 ## Source Code Paths
 -   `main.go`: Application entry point. Initializes the root command.
 -   `cmd/`: Contains Cobra command definitions.
-    -   `cmd/serve.go`: Defines the `serve` command which starts the Gin server and defines routes.
+    -   `cmd/serve.go`: Defines the `serve` command which starts the Gin server and registers routes.
+-   `api/`: Contains API endpoint handlers.
 
 ## Key Technical Decisions
 -   **Go:** Chosen for performance, single-binary deployment, and strong concurrency support.

@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/pedxyuyuko/ollama_honeypot/v2/api"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -60,6 +61,16 @@ var Serve = &cobra.Command{
 			portStr = "11434"
 		}
 
+		// Determine mock path
+		mockPath, _ := cmd.Flags().GetString("mock-path")
+		if mockPath == "" {
+			mockPath = os.Getenv("MOCK_PATH")
+		}
+		if mockPath == "" {
+			mockPath = "./mock"
+		}
+		api.MockPath = mockPath
+
 		// Set up logrus for JSON structured logging
 		logrus.SetFormatter(&logrus.JSONFormatter{})
 
@@ -72,9 +83,10 @@ var Serve = &cobra.Command{
 		// Add recovery middleware
 		r.Use(gin.Recovery())
 
-		r.GET("/", func(c *gin.Context) {
-			c.String(200, "Ollama Honeypot")
-		})
+		r.GET("/", api.HealthHandler)
+
+		r.GET("/api/version", api.VersionHandler)
+
 		fmt.Printf("Starting honeypot server on :%s\n", portStr)
 		log.Fatal(r.Run(":" + portStr))
 	},
@@ -82,4 +94,5 @@ var Serve = &cobra.Command{
 
 func init() {
 	Serve.Flags().StringP("port", "p", "", "Port to bind to")
+	Serve.Flags().StringP("mock-path", "m", "", "Path to mock data directory")
 }

@@ -9,6 +9,7 @@ The project is in the initial setup phase. The basic structure is in place with 
 - Set up `go.mod` with dependencies (`gin`, `cobra`).
 - Initialized Memory Bank.
 - Added logrus logging framework with structured JSON logging for request details (IP, timestamp, method, path, body).
+- Refactored API endpoint handlers into separate files under ./api directory for better organization.
 
 ## Next Steps
 1.  Implement `POST /api/generate` endpoint to mimic text generation.

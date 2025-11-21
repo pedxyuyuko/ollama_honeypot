@@ -27,8 +27,8 @@ go.work.sum
 # env file
 .env
 
-./ollama_honeypot
-
 # Editor/IDE
 # .idea/
 # .vscode/
+ollama_honeypot
+__debug_*
