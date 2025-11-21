@@ -4,6 +4,7 @@
 -   **Language:** Go (v1.25.4)
 -   **Web Framework:** Gin (v1.11.0)
 -   **CLI Library:** Cobra (v1.10.1)
+-   **Logging Library:** Logrus (v1.9.3)
 
 ## Development Setup
 -   **Build:** Standard Go build system (`go build`).
@@ -16,3 +17,4 @@
 ## Dependencies
 -   `github.com/gin-gonic/gin`: HTTP web framework.
 -   `github.com/spf13/cobra`: CLI application structure.
+-   `github.com/sirupsen/logrus`: Structured logging library.
