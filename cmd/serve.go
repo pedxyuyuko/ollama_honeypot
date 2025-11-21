@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 )
 
@@ -13,10 +13,11 @@ var Serve = &cobra.Command{
 	Short: "Start the honeypot server",
 	Long:  `Start the HTTP server to serve as a honeypot for Ollama API.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Starting honeypot server on :11434")
-		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprintf(w, "Ollama Honeypot")
+		r := gin.Default()
+		r.GET("/", func(c *gin.Context) {
+			c.String(200, "Ollama Honeypot")
 		})
-		log.Fatal(http.ListenAndServe(":11434", nil))
+		fmt.Println("Starting honeypot server on :11434")
+		log.Fatal(r.Run(":11434"))
 	},
 }
