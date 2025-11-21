@@ -3,5 +3,5 @@ package api
 import "github.com/gin-gonic/gin"
 
 func HealthHandler(c *gin.Context) {
-	c.String(200, "Ollama Honeypot")
+	c.String(200, "Ollama is running")
 }

@@ -87,6 +87,8 @@ var Serve = &cobra.Command{
 
 		r.GET("/api/version", api.VersionHandler)
 
+		r.GET("/api/tags", api.TagsHandler)
+
 		fmt.Printf("Starting honeypot server on :%s\n", portStr)
 		log.Fatal(r.Run(":" + portStr))
 	},

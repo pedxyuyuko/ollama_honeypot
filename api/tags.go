@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func VersionHandler(c *gin.Context) {
-	data, err := os.ReadFile(filepath.Join(MockPath, "version.json"))
+func TagsHandler(c *gin.Context) {
+	data, err := os.ReadFile(filepath.Join(MockPath, "tags.json"))
 	if err != nil {
 		c.Header("Content-Type", "application/json")
 		c.Data(500, "application/json", []byte(`{"error": "Internal server error"}`))

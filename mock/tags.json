@@ -1,0 +1,49 @@
+{
+    "models": [
+        {
+            "name": "llama2",
+            "modified_at": "2023-08-02T20:39:26.963541Z",
+            "size": 3825819519,
+            "digest": "sha256:8934d96d3f9",
+            "details": {
+                "format": "gguf",
+                "family": "llama",
+                "families": [
+                    "llama"
+                ],
+                "parameter_size": "7B",
+                "quantization_level": "Q4_0"
+            }
+        },
+        {
+            "name": "mistral",
+            "modified_at": "2023-10-15T14:22:10.123456Z",
+            "size": 4108958592,
+            "digest": "sha256:bc123def456",
+            "details": {
+                "format": "gguf",
+                "family": "mistral",
+                "families": [
+                    "mistral"
+                ],
+                "parameter_size": "7B",
+                "quantization_level": "Q4_0"
+            }
+        },
+        {
+            "name": "codellama",
+            "modified_at": "2023-09-20T10:15:30.654321Z",
+            "size": 5000000000,
+            "digest": "sha256:abcd1234efg",
+            "details": {
+                "format": "gguf",
+                "family": "llama",
+                "families": [
+                    "llama"
+                ],
+                "parameter_size": "13B",
+                "quantization_level": "Q4_0"
+            }
+        }
+    ]
+}
