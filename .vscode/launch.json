@@ -5,6 +5,9 @@
             "name": "Launch Package",
             "type": "go",
             "request": "launch",
+            "args": [
+                "serve"
+            ],
             "program": "${workspaceFolder}"
         }
     ]
