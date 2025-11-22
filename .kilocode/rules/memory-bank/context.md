@@ -20,8 +20,8 @@ The project is in the initial setup phase. The basic structure is in place with 
 - Consolidated api/pull.go by extracting duplicate logic into reusable helper functions (parseModelName and streamNDJSON) in api/api.go.
 - Modified pull endpoint to use full model names including tags as database keys for proper model identification.
 - Implemented `DELETE /api/delete` endpoint to mimic model deletion.
+- Implemented `POST /api/generate` endpoint to mimic text generation with streaming NDJSON responses.
+- Implemented `POST /api/chat` endpoint to mimic chat completion.
 
 ## Next Steps
-1.  Implement `POST /api/generate` endpoint to mimic text generation.
-2.  Implement `POST /api/chat` endpoint to mimic chat completion.
-3.  Add configuration support (env vars/flags) for port and logging options.
+1.  Add configuration support (env vars/flags) for port and logging options.

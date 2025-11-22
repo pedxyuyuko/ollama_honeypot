@@ -222,20 +222,7 @@ func PullHandler(c *gin.Context) {
 		return
 	}
 
-	metadataDigits := ""
-	for _, layer := range manifest.Layers {
-		if layer.MediaType == "application/vnd.docker.container.image.v1+json" {
-			metadataDigits = layer.Digest
-			break
-		}
-	}
-
-	if metadataDigits == "" {
-		c.JSON(500, gin.H{"error": "Can not find metadata"})
-		return
-	}
-
-	rawMeta, err := fetchBlob(repo, metadataDigits)
+	rawMeta, err := fetchBlob(repo, manifest.Config.Digest)
 	if err != nil {
 		c.JSON(500, gin.H{"error": fmt.Sprintf("Can not download meta: %s", err)})
 		return
