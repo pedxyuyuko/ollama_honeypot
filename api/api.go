@@ -8,17 +8,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type RootFS struct {
+	Type    string   `json:"type"`
+	DiffIDs []string `json:"diff_ids"`
+}
+
 type ModelDetails struct {
-	Format            string   `json:"format"`
-	Family            string   `json:"family"`
-	Families          []string `json:"families"`
-	ParameterSize     string   `json:"parameter_size"`
-	QuantizationLevel string   `json:"quantization_level"`
+	ModelFormat   string   `json:"model_format"`
+	ModelFamily   string   `json:"model_family"`
+	ModelFamilies []string `json:"model_families"`
+	ModelType     string   `json:"model_type"`
+	FileType      string   `json:"file_type"`
+	Architecture  string   `json:"architecture"`
+	OS            string   `json:"os"`
+	RootFS        RootFS   `json:"rootfs"`
 }
 
 type Layer struct {
-	Digest string `json:"digest"`
-	Size   int64  `json:"size"`
+	Digest    string `json:"digest"`
+	Size      int64  `json:"size"`
+	MediaType string `json:"mediaType"`
 }
 
 type Model struct {
@@ -48,6 +57,24 @@ func LoadModels() error {
 		Models[model.Name] = model
 	}
 	return nil
+}
+
+func SaveModels() error {
+	models := make([]Model, 0, len(Models))
+	for _, model := range Models {
+		models = append(models, model)
+	}
+	data := struct {
+		Models []Model `json:"models"`
+	}{Models: models}
+	file, err := os.Create(MockPath + "/tags.json")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "    ")
+	return encoder.Encode(data)
 }
 
 var MockPath = "./mock"

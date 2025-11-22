@@ -1,18 +1,13 @@
 package api
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/gin-gonic/gin"
 )
 
 func TagsHandler(c *gin.Context) {
-	data, err := os.ReadFile(filepath.Join(MockPath, "tags.json"))
-	if err != nil {
-		c.Header("Content-Type", "application/json")
-		c.Data(500, "application/json", []byte(`{"error": "Internal server error"}`))
-		return
+	models := make([]Model, 0, len(Models))
+	for _, model := range Models {
+		models = append(models, model)
 	}
-	c.Data(200, "application/json", data)
+	c.JSON(200, gin.H{"models": models})
 }

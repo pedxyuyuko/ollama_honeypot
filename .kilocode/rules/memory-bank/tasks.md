@@ -4,3 +4,5 @@
 2. git commit
     - title and body (line break "\n" between title and body)
     - title should be simple phrase (verb + changes) & use emoji 
+
+DO NOT OUTPUT A SUMMARY AFTER ``git commit``, AND JUST MARK TASK AS FINISHED

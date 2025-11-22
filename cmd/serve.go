@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -95,6 +97,18 @@ var Serve = &cobra.Command{
 		r.GET("/api/tags", api.TagsHandler)
 
 		r.POST("/api/pull", api.PullHandler)
+
+		// Handle shutdown signals
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+		go func() {
+			<-sigChan
+			log.Println("Shutting down...")
+			if err := api.SaveModels(); err != nil {
+				log.Printf("Error saving models: %v", err)
+			}
+			os.Exit(0)
+		}()
 
 		fmt.Printf("Starting honeypot server on :%s\n", portStr)
 		log.Fatal(r.Run(":" + portStr))

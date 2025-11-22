@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"math"
 	"math/rand"
@@ -21,7 +22,14 @@ type PullConfig struct {
 	WaveAmplitude float64
 }
 
+type Config struct {
+	MediaType string `json:"mediaType"`
+	Size      int64  `json:"size"`
+	Digest    string `json:"digest"`
+}
+
 type Manifest struct {
+	Config Config  `json:"config"`
 	Layers []Layer `json:"layers"`
 }
 
@@ -98,7 +106,24 @@ func fetchManifest(repo, tag string) (Manifest, error) {
 		return Manifest{}, err
 	}
 	_ = resp.Body.Close()
+	// Include the config as the first layer for realistic pulling simulation
+	configLayer := Layer{
+		Digest:    manifest.Config.Digest,
+		Size:      manifest.Config.Size,
+		MediaType: manifest.Config.MediaType,
+	}
+	manifest.Layers = append([]Layer{configLayer}, manifest.Layers...)
 	return manifest, nil
+}
+
+func fetchBlob(repo, digest string) ([]byte, error) {
+	url := "https://registry.ollama.ai/v2/" + repo + "/blobs/" + digest
+	resp, err := http.Get(url)
+	if err != nil || resp.StatusCode != 200 {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	return io.ReadAll(resp.Body)
 }
 
 func simulatePull(c *gin.Context, manifest Manifest, config PullConfig) {
@@ -149,7 +174,7 @@ func simulatePull(c *gin.Context, manifest Manifest, config PullConfig) {
 	})
 }
 
-func addModelToDatabase(fullName string, manifest Manifest) {
+func addModelToDatabase(fullName string, manifest Manifest, modelDetails ModelDetails) {
 	var totalSize int64
 	for _, layer := range manifest.Layers {
 		totalSize += layer.Size
@@ -159,14 +184,8 @@ func addModelToDatabase(fullName string, manifest Manifest) {
 		ModifiedAt: time.Now().Format(time.RFC3339),
 		Size:       totalSize,
 		Digest:     manifest.Layers[0].Digest,
-		Details: ModelDetails{
-			Format:            "gguf",
-			Family:            "unknown",
-			Families:          []string{"unknown"},
-			ParameterSize:     "unknown",
-			QuantizationLevel: "unknown",
-		},
-		Layers: manifest.Layers,
+		Details:    modelDetails,
+		Layers:     manifest.Layers,
 	}
 }
 
@@ -202,8 +221,34 @@ func PullHandler(c *gin.Context) {
 		c.JSON(404, gin.H{"error": "model not found"})
 		return
 	}
+
+	metadataDigits := ""
+	for _, layer := range manifest.Layers {
+		if layer.MediaType == "application/vnd.docker.container.image.v1+json" {
+			metadataDigits = layer.Digest
+			break
+		}
+	}
+
+	if metadataDigits == "" {
+		c.JSON(500, gin.H{"error": "Can not find metadata"})
+		return
+	}
+
+	rawMeta, err := fetchBlob(repo, metadataDigits)
+	if err != nil {
+		c.JSON(500, gin.H{"error": fmt.Sprintf("Can not download meta: %s", err)})
+		return
+	}
+
+	var mDetails ModelDetails
+	if err := json.Unmarshal(rawMeta, &mDetails); err != nil {
+		c.JSON(500, gin.H{"error": fmt.Sprintf("Can not parse meta: %s", err)})
+		return
+	}
+
 	config := loadPullConfig()
 	simulatePull(c, manifest, config)
 	// Add model to database
-	addModelToDatabase(fullName, manifest)
+	addModelToDatabase(fullName, manifest, mDetails)
 }
