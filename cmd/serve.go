@@ -98,6 +98,8 @@ var Serve = &cobra.Command{
 
 		r.POST("/api/pull", api.PullHandler)
 
+		r.DELETE("/api/delete", api.DeleteHandler)
+
 		// Handle shutdown signals
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
