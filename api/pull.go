@@ -217,7 +217,7 @@ func PullHandler(c *gin.Context) {
 		repo = "library/" + modelName
 	}
 	manifest, err := fetchManifest(repo, tag)
-	if err != nil {
+	if err != nil || len(manifest.Layers) == 0 {
 		c.JSON(404, gin.H{"error": "model not found"})
 		return
 	}

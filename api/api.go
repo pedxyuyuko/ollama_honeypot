@@ -44,6 +44,10 @@ var Models = make(map[string]Model)
 func LoadModels() error {
 	file, err := os.Open(MockPath + "/tags.json")
 	if err != nil {
+		if os.IsNotExist(err) {
+			// Create the file with empty models if it doesn't exist
+			return SaveModels()
+		}
 		return err
 	}
 	defer file.Close()
