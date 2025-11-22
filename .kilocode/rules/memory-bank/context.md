@@ -11,6 +11,11 @@ The project is in the initial setup phase. The basic structure is in place with 
 - Added logrus logging framework with structured JSON logging for request details (IP, timestamp, method, path, body).
 - Refactored API endpoint handlers into separate files under ./api directory for better organization.
 - Implemented `GET /api/tags` endpoint to list fake models.
+- Added environment variable support with .env file loading.
+- Added CLI flags for port and mock-path.
+- Implemented `POST /api/pull` endpoint to simulate model pulling with configurable download speeds.
+- Added .example.env configuration file.
+- Updated dependencies in go.mod and go.sum.
 
 ## Next Steps
 1.  Implement `POST /api/generate` endpoint to mimic text generation.
