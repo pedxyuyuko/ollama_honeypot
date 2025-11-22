@@ -71,6 +71,10 @@ var Serve = &cobra.Command{
 		}
 		api.MockPath = mockPath
 
+		if err := api.LoadModels(); err != nil {
+			log.Printf("Failed to load models: %v", err)
+		}
+
 		// Set up logrus for JSON structured logging
 		logrus.SetFormatter(&logrus.JSONFormatter{})
 

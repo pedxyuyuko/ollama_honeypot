@@ -16,6 +16,9 @@ The project is in the initial setup phase. The basic structure is in place with 
 - Implemented `POST /api/pull` endpoint to simulate model pulling with configurable download speeds.
 - Added .example.env configuration file.
 - Updated dependencies in go.mod and go.sum.
+- Implemented global models database: loads from mock/tags.json at startup, checks for existing models in pull requests, and updates database after successful pulls.
+- Consolidated api/pull.go by extracting duplicate logic into reusable helper functions (parseModelName and streamNDJSON) in api/api.go.
+- Modified pull endpoint to use full model names including tags as database keys for proper model identification.
 
 ## Next Steps
 1.  Implement `POST /api/generate` endpoint to mimic text generation.

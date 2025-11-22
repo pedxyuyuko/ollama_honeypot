@@ -21,6 +21,10 @@ type PullConfig struct {
 	WaveAmplitude float64
 }
 
+type Manifest struct {
+	Layers []Layer `json:"layers"`
+}
+
 func loadPullConfig() PullConfig {
 	config := PullConfig{
 		Speed:         1048576, // Default 1MB/s
@@ -56,6 +60,116 @@ func loadPullConfig() PullConfig {
 	return config
 }
 
+func handleExistingModelPull(c *gin.Context, fullName string) {
+	streamNDJSON(c, func() <-chan map[string]interface{} {
+		ch := make(chan map[string]interface{})
+		go func() {
+			defer close(ch)
+			ch <- map[string]interface{}{"status": "pulling manifest"}
+			time.Sleep(200 * time.Millisecond)
+			// Iterate through all layers
+			for _, layer := range Models[fullName].Layers {
+				ch <- map[string]interface{}{
+					"status":    "pulling layers",
+					"digest":    layer.Digest,
+					"total":     layer.Size,
+					"completed": layer.Size,
+				}
+				time.Sleep(100 * time.Millisecond)
+			}
+			ch <- map[string]interface{}{"status": "verifying sha256 digest"}
+			time.Sleep(500 * time.Millisecond)
+			ch <- map[string]interface{}{"status": "writing manifest"}
+			time.Sleep(800 * time.Millisecond)
+			ch <- map[string]interface{}{"status": "success"}
+		}()
+		return ch
+	})
+}
+
+func fetchManifest(repo, tag string) (Manifest, error) {
+	url := "https://registry.ollama.ai/v2/" + repo + "/manifests/" + tag
+	resp, err := http.Get(url)
+	if err != nil || resp.StatusCode != 200 {
+		return Manifest{}, err
+	}
+	var manifest Manifest
+	if err := json.NewDecoder(io.TeeReader(resp.Body, io.Discard)).Decode(&manifest); err != nil {
+		return Manifest{}, err
+	}
+	_ = resp.Body.Close()
+	return manifest, nil
+}
+
+func simulatePull(c *gin.Context, manifest Manifest, config PullConfig) {
+	interval := 100 * time.Millisecond
+	streamNDJSON(c, func() <-chan map[string]interface{} {
+		ch := make(chan map[string]interface{})
+		go func() {
+			defer close(ch)
+			startTime := time.Now()
+			// Simulate pulling manifest
+			ch <- map[string]interface{}{"status": "pulling manifest"}
+			time.Sleep(200 * time.Millisecond)
+			// Simulate pulling layers from manifest
+			for _, layer := range manifest.Layers {
+				completed := int64(0)
+				total := layer.Size
+				for completed < total {
+					elapsed := time.Since(startTime).Seconds()
+					wave := math.Cos(2*math.Pi*elapsed/config.WavePeriod) * config.WaveAmplitude * float64(config.Speed)
+					randomError := (rand.Float64()*2 - 1) * config.Variance * float64(config.Speed)
+					currentSpeed := float64(config.Speed) + wave + randomError
+					if currentSpeed < 0 {
+						currentSpeed = 0
+					}
+					increment := int64(currentSpeed * float64(interval) / float64(time.Second))
+					if increment <= 0 {
+						increment = 1
+					}
+					if completed+increment > total {
+						increment = total - completed
+					}
+					completed += increment
+					ch <- map[string]interface{}{
+						"status":    "pulling layers",
+						"digest":    layer.Digest,
+						"total":     total,
+						"completed": completed,
+					}
+					time.Sleep(interval)
+				}
+			}
+			// Success
+			ch <- map[string]interface{}{"status": "verifying sha256 digest"}
+			ch <- map[string]interface{}{"status": "writing manifest"}
+			ch <- map[string]interface{}{"status": "success"}
+		}()
+		return ch
+	})
+}
+
+func addModelToDatabase(fullName string, manifest Manifest) {
+	var totalSize int64
+	for _, layer := range manifest.Layers {
+		totalSize += layer.Size
+	}
+	Models[fullName] = Model{
+		Name:       fullName,
+		ModifiedAt: time.Now().Format(time.RFC3339),
+		Size:       totalSize,
+		Digest:     manifest.Layers[0].Digest,
+		Details: ModelDetails{
+			Format:            "gguf",
+			Family:            "unknown",
+			Families:          []string{"unknown"},
+			ParameterSize:     "unknown",
+			QuantizationLevel: "unknown",
+		},
+		Layers: manifest.Layers,
+	}
+}
+
 func PullHandler(c *gin.Context) {
 	var req struct {
 		Name string `json:"name"`
@@ -64,17 +178,18 @@ func PullHandler(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "invalid request"})
 		return
 	}
-
-	// Parse model name and tag
-	var modelName, tag string
-	parts := strings.Split(req.Name, ":")
-	modelName = parts[0]
-	if len(parts) > 1 {
-		tag = parts[1]
-	} else {
-		tag = "latest"
+	// Normalize model name to include tag
+	fullName := req.Name
+	if !strings.Contains(fullName, ":") {
+		fullName += ":latest"
 	}
-
+	// Parse model name and tag
+	modelName, tag := parseModelName(fullName)
+	// Check if model already exists
+	if _, exists := Models[fullName]; exists {
+		handleExistingModelPull(c, fullName)
+		return
+	}
 	// Check if model exists in registry and get manifest
 	var repo string
 	if strings.Contains(modelName, "/") {
@@ -82,83 +197,13 @@ func PullHandler(c *gin.Context) {
 	} else {
 		repo = "library/" + modelName
 	}
-	url := "https://registry.ollama.ai/v2/" + repo + "/manifests/" + tag
-	resp, err := http.Get(url)
-	if err != nil || resp.StatusCode != 200 {
+	manifest, err := fetchManifest(repo, tag)
+	if err != nil {
 		c.JSON(404, gin.H{"error": "model not found"})
 		return
 	}
-
-	var manifest struct {
-		Layers []struct {
-			Digest string `json:"digest"`
-			Size   int64  `json:"size"`
-		} `json:"layers"`
-	}
-	if err := json.NewDecoder(io.TeeReader(resp.Body, io.Discard)).Decode(&manifest); err != nil {
-		c.JSON(404, gin.H{"error": "invalid manifest"})
-		return
-	}
-	resp.Body.Close()
-
-	// Set headers for streaming
-	c.Header("Content-Type", "application/x-ndjson")
-	c.Writer.WriteHeader(200)
-
 	config := loadPullConfig()
-	interval := 100 * time.Millisecond
-
-	// Channel for progress messages
-	ch := make(chan map[string]interface{})
-	go func() {
-		defer close(ch)
-		startTime := time.Now()
-
-		// Simulate pulling manifest
-		ch <- map[string]interface{}{"status": "pulling manifest"}
-		time.Sleep(200 * time.Millisecond)
-
-		// Simulate pulling layers from manifest
-		for _, layer := range manifest.Layers {
-			completed := int64(0)
-			total := layer.Size
-			for completed < total {
-				elapsed := time.Since(startTime).Seconds()
-				wave := math.Cos(2*math.Pi*elapsed/config.WavePeriod) * config.WaveAmplitude * float64(config.Speed)
-				randomError := (rand.Float64()*2 - 1) * config.Variance * float64(config.Speed)
-				currentSpeed := float64(config.Speed) + wave + randomError
-				if currentSpeed < 0 {
-					currentSpeed = 0
-				}
-				increment := int64(currentSpeed * float64(interval) / float64(time.Second))
-				if increment <= 0 {
-					increment = 1
-				}
-				if completed+increment > total {
-					increment = total - completed
-				}
-				completed += increment
-				ch <- map[string]interface{}{
-					"status":    "pulling layers",
-					"digest":    layer.Digest,
-					"total":     total,
-					"completed": completed,
-				}
-				time.Sleep(interval)
-			}
-		}
-
-		// Success
-		ch <- map[string]interface{}{"status": "success"}
-	}()
-
-	// Stream the messages
-	for msg := range ch {
-		data, _ := json.Marshal(msg)
-		c.Writer.Write(data)
-		c.Writer.Write([]byte("\n"))
-		if flusher, ok := c.Writer.(interface{ Flush() }); ok {
-			flusher.Flush()
-		}
-	}
+	simulatePull(c, manifest, config)
+	// Add model to database
+	addModelToDatabase(fullName, manifest)
 }
