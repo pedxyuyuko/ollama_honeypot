@@ -1,5 +1,7 @@
 # Ollama 蜜罐
 
+[English](README.md)
+
 一个轻量级的 Go 应用程序，用于模拟 Ollama API 以检测和记录未经授权的访问 Ollama 服务的尝试。
 
 ## 问题陈述
@@ -22,6 +24,9 @@ Ollama 是一个流行的本地运行 LLM 的工具。随着其采用率的增�
   - `GET /api/ps`: 模拟运行模型状态列表。
   - `GET /api/show`: 显示模型信息。
   - `GET /api/version`: 获取版本信息。
+  - `GET /v1/models`: 模拟 OpenAI 的模型列表 API。
+  - `POST /v1/chat/completions`: 模拟 OpenAI 的聊天完成 API，支持流式传输。
+  - `POST /chat/completions`: 模拟 OpenAI 的聊天完成 API，支持流式传输。
 
 - **请求日志记录：** 使用结构化 JSON 日志记录捕获 IP、时间戳、端点、方法和请求体（提示）。
 - **配置：** 通过环境变量或 CLI 标志支持自定义端口、日志偏好和模拟数据路径。

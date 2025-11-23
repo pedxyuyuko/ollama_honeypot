@@ -1,5 +1,7 @@
 # Ollama Honeypot
 
+[中文版](README_zh.md)
+
 A lightweight Go application that mimics the Ollama API to detect and log unauthorized attempts to access Ollama services.
 
 ## Problem Statement
@@ -22,6 +24,9 @@ Ollama is a popular tool for running LLMs locally. As its adoption grows, it bec
   - `GET /api/ps`: Mimic running model status listing.
   - `GET /api/show`: Show model information.
   - `GET /api/version`: Get version information.
+  - `GET /v1/models`: Mimic OpenAI's models listing API.
+  - `POST /v1/chat/completions`: Mimic OpenAI's chat completions API with streaming support.
+  - `POST /chat/completions`: Mimic OpenAI's chat completions API with streaming support.
 
 - **Request Logging:** Capture IP, timestamp, endpoint, method, and request body (prompts) with structured JSON logging.
 - **Configuration:** Support for custom ports, logging preferences, and mock data paths via environment variables or CLI flags.
