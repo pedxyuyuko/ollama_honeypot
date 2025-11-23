@@ -1,14 +1,11 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -20,27 +17,12 @@ import (
 // requestLogger is a Gin middleware for logging requests
 func requestLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Read request body for logging
-		var body string
-		if c.Request.Method == "POST" || c.Request.Method == "PUT" || c.Request.Method == "PATCH" {
-			if c.Request.Body != nil {
-				bodyBytes, err := io.ReadAll(c.Request.Body)
-				if err == nil {
-					body = string(bodyBytes)
-					// Restore the body for further processing
-					c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
-				}
-			}
-		}
-
 		// Log using logrus
 		logrus.WithFields(logrus.Fields{
-			"timestamp": time.Now().Format(time.RFC3339),
-			"ip":        c.ClientIP(),
-			"method":    c.Request.Method,
-			"path":      c.Request.URL.Path,
-			"body":      body,
-		}).Info("Request received")
+			"ip":     c.ClientIP(),
+			"method": c.Request.Method,
+			"path":   c.Request.URL.Path,
+		}).Info("Http request")
 
 		c.Next()
 	}
@@ -73,6 +55,15 @@ var Serve = &cobra.Command{
 		}
 		api.MockPath = mockPath
 
+		// Determine audit log path
+		auditLogPath, _ := cmd.Flags().GetString("log-path")
+		if auditLogPath == "" {
+			auditLogPath = os.Getenv("LOG_PATH")
+		}
+
+		// Initialize audit logger
+		api.InitAuditLogger(auditLogPath)
+
 		if err := api.LoadModels(); err != nil {
 			log.Printf("Failed to load models: %v", err)
 		}
@@ -81,8 +72,8 @@ var Serve = &cobra.Command{
 			log.Printf("Failed to load responses: %v", err)
 		}
 
-		// Set up logrus for JSON structured logging
-		logrus.SetFormatter(&logrus.JSONFormatter{})
+		// Set up logrus for text logging to console
+		logrus.SetFormatter(&logrus.TextFormatter{})
 
 		if os.Getenv("DEBUG") == "" || os.Getenv("DEBUG") == "0" {
 			gin.SetMode(gin.ReleaseMode)
@@ -138,4 +129,5 @@ var Serve = &cobra.Command{
 func init() {
 	Serve.Flags().StringP("port", "p", "", "Port to bind to")
 	Serve.Flags().StringP("mock-path", "m", "", "Path to mock data directory")
+	Serve.Flags().StringP("log-path", "a", "", "Path to audit log file")
 }

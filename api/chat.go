@@ -1,28 +1,34 @@
 package api
 
 import (
+	"fmt"
 	"math/rand"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role      string   `json:"role"`
+	Content   string   `json:"content"`
+	ToolCalls []string `json:"tool_calls"`
 }
 
 type ChatRequest struct {
-	Model    string    `json:"model"`
-	Messages []Message `json:"messages"`
-	Stream   bool      `json:"stream"`
+	Model    string         `json:"model"`
+	Messages []Message      `json:"messages"`
+	Stream   bool           `json:"stream"`
+	Tools    string         `json:"tools"`
+	Options  map[string]any `json:"options"`
+	Think    string         `json:"think"`
 }
 
 func ChatHandler(c *gin.Context) {
 	var req ChatRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": "invalid request"})
+		c.JSON(400, gin.H{"error": fmt.Sprintf("invalid request: %s", err)})
 		return
 	}
 
@@ -31,6 +37,22 @@ func ChatHandler(c *gin.Context) {
 	if !strings.Contains(fullModel, ":") {
 		fullModel += ":latest"
 	}
+
+	// Filter messages to only user role
+	var userMessages []Message
+	for _, msg := range req.Messages {
+		if msg.Role == "user" {
+			userMessages = append(userMessages, msg)
+		}
+	}
+
+	AuditLogger.WithFields(logrus.Fields{
+		"ip":       c.ClientIP(),
+		"model":    fullModel,
+		"messages": userMessages,
+		"options":  req.Options,
+		"think":    req.Think,
+	}).Info("chat")
 
 	// Check if model exists
 	if _, exists := Models[fullModel]; !exists {

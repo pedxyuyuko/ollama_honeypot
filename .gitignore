@@ -32,3 +32,5 @@ go.work.sum
 # .vscode/
 ollama_honeypot
 __debug_*
+
+*.log

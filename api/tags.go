@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type ModelDetailsOutput struct {
@@ -14,6 +15,7 @@ type ModelDetailsOutput struct {
 
 type ModelInfo struct {
 	Name       string             `json:"name"`
+	Model      string             `json:"model"`
 	ModifiedAt string             `json:"modified_at"`
 	Size       int64              `json:"size"`
 	Digest     string             `json:"digest"`
@@ -25,10 +27,15 @@ type TagsResponse struct {
 }
 
 func TagsHandler(c *gin.Context) {
+	AuditLogger.WithFields(logrus.Fields{
+		"ip": c.ClientIP(),
+	}).Info("tags")
+
 	models := make([]ModelInfo, 0)
 	for _, model := range Models {
 		modelInfo := ModelInfo{
 			Name:       model.Name,
+			Model:      model.Name,
 			ModifiedAt: model.ModifiedAt,
 			Size:       model.Size,
 			Digest:     model.Digest,

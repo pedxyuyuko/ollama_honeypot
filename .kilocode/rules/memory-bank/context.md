@@ -23,6 +23,9 @@ The project is in the initial setup phase. The basic structure is in place with 
 - Implemented `POST /api/generate` endpoint to mimic text generation with streaming NDJSON responses.
 - Implemented `POST /api/chat` endpoint to mimic chat completion.
 - Implemented `GET /api/ps` endpoint to mimic running model status listing.
+- Added second logger for auditing with configurable log path, supporting text output to console and JSON output to file.
+- Added CLI flag --log-path and environment variable LOG_PATH for audit log file path.
+- Updated .example.env to include LOG_PATH and DEBUG environment variables.
 
 ## Next Steps
 1.  Add configuration support (env vars/flags) for port and logging options.

@@ -2,11 +2,48 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
+
+// FileHook is a logrus hook for writing JSON logs to a file
+type FileHook struct {
+	file *os.File
+}
+
+func (h *FileHook) Fire(entry *logrus.Entry) error {
+	formatter := &logrus.JSONFormatter{}
+	formatted, err := formatter.Format(entry)
+	if err != nil {
+		return err
+	}
+	_, err = h.file.Write(formatted)
+	return err
+}
+
+func (h *FileHook) Levels() []logrus.Level {
+	return logrus.AllLevels
+}
+
+var AuditLogger *logrus.Logger
+
+func InitAuditLogger(logPath string) {
+	AuditLogger = logrus.New()
+	AuditLogger.SetFormatter(&logrus.TextFormatter{})
+	if logPath != "" {
+		file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			log.Printf("Failed to open audit log file: %v", err)
+		} else {
+			hook := &FileHook{file: file}
+			AuditLogger.AddHook(hook)
+		}
+	}
+}
 
 type RootFS struct {
 	Type    string   `json:"type"`

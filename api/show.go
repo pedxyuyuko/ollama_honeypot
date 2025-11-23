@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type ShowRequest struct {
@@ -24,6 +25,10 @@ func ShowHandler(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Invalid request"})
 		return
 	}
+
+	AuditLogger.WithFields(logrus.Fields{
+		"ip": c.ClientIP(),
+	}).Info("show")
 
 	model, exists := Models[req.Name]
 	if !exists {

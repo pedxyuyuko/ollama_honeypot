@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type PullConfig struct {
@@ -79,7 +80,7 @@ func handleExistingModelPull(c *gin.Context, fullName string) {
 			for _, layer := range Models[fullName].Layers {
 				ch <- map[string]interface{}{
 					"status":    "pulling layers",
-					"digest":    layer.Digest,
+					"digest":    strings.TrimPrefix(layer.Digest, "sha256:"),
 					"total":     layer.Size,
 					"completed": layer.Size,
 				}
@@ -158,7 +159,7 @@ func simulatePull(c *gin.Context, manifest Manifest, config PullConfig) {
 					completed += increment
 					ch <- map[string]interface{}{
 						"status":    "pulling layers",
-						"digest":    layer.Digest,
+						"digest":    strings.TrimPrefix(layer.Digest, "sha256:"),
 						"total":     total,
 						"completed": completed,
 					}
@@ -179,13 +180,21 @@ func addModelToDatabase(fullName string, manifest Manifest, modelDetails ModelDe
 	for _, layer := range manifest.Layers {
 		totalSize += layer.Size
 	}
+	layers := make([]Layer, len(manifest.Layers))
+	for i, layer := range manifest.Layers {
+		layers[i] = Layer{
+			Digest:    strings.TrimPrefix(layer.Digest, "sha256:"),
+			Size:      layer.Size,
+			MediaType: layer.MediaType,
+		}
+	}
 	Models[fullName] = Model{
 		Name:       fullName,
-		ModifiedAt: time.Now().Format(time.RFC3339),
+		ModifiedAt: time.Now().Format(time.RFC3339Nano),
 		Size:       totalSize,
-		Digest:     manifest.Layers[0].Digest,
+		Digest:     strings.TrimPrefix(manifest.Layers[0].Digest, "sha256:"),
 		Details:    modelDetails,
-		Layers:     manifest.Layers,
+		Layers:     layers,
 	}
 }
 
@@ -202,6 +211,12 @@ func PullHandler(c *gin.Context) {
 	if !strings.Contains(fullName, ":") {
 		fullName += ":latest"
 	}
+
+	AuditLogger.WithFields(logrus.Fields{
+		"ip":    c.ClientIP(),
+		"model": fullName,
+	}).Info("pull")
+
 	// Parse model name and tag
 	modelName, tag := parseModelName(fullName)
 	// Check if model already exists

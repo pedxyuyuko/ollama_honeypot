@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type GenerateRequest struct {
@@ -37,6 +38,12 @@ func GenerateHandler(c *gin.Context) {
 	if !strings.Contains(fullModel, ":") {
 		fullModel += ":latest"
 	}
+
+	AuditLogger.WithFields(logrus.Fields{
+		"ip":     c.ClientIP(),
+		"model":  fullModel,
+		"prompt": req.Prompt,
+	}).Info("generate")
 
 	// Check if model exists
 	if _, exists := Models[fullModel]; !exists {
