@@ -1,27 +1,52 @@
 [
     {
-        "text": "This is a simulated response from the Ollama honeypot.",
+        "text": "Ciallo ～(∠・ω< )⌒★! ",
         "repeat_min": 1,
-        "repeat_max": 3
+        "repeat_max": 10
     },
     {
-        "text": "Fake text generation for security monitoring purposes.",
-        "repeat_min": 2,
-        "repeat_max": 4
+        "text": "Bad Apple!! ",
+        "repeat_min": 1,
+        "repeat_max": 10
     },
     {
-        "text": "Honeypot alert: unauthorized access detected.",
-        "repeat_min": 1,
-        "repeat_max": 2
+        "text": "uwu",
+        "repeat_min": 5,
+        "repeat_max": 10
     },
     {
-        "text": "Your request has been logged for analysis.",
-        "repeat_min": 1,
-        "repeat_max": 3
+        "text": "oi",
+        "repeat_min": 8,
+        "repeat_max": 20
     },
     {
-        "text": "This is not a real Ollama response.",
+        "text": "... 2024-10-04 the world start ...",
         "repeat_min": 1,
-        "repeat_max": 2
+        "repeat_max": 8
+    },
+    {
+        "text": "Emergency ",
+        "repeat_min": 1,
+        "repeat_max": 5
+    },
+    {
+        "text": "Baka Shinji",
+        "repeat_min": 1,
+        "repeat_max": 5
+    },
+    {
+        "text": "Generating beyond prompt's end",
+        "repeat_min": 1,
+        "repeat_max": 1
+    },
+    {
+        "text": "1d20 ",
+        "repeat_min": 4,
+        "repeat_max": 8
+    },
+    {
+        "text": "Shojo Now Loading... ",
+        "repeat_min": 1,
+        "repeat_max": 10
     }
 ]

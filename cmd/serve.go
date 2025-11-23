@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
@@ -82,13 +81,12 @@ var Serve = &cobra.Command{
 			log.Printf("Failed to load responses: %v", err)
 		}
 
-		rand.Seed(time.Now().UnixNano())
-
 		// Set up logrus for JSON structured logging
 		logrus.SetFormatter(&logrus.JSONFormatter{})
 
 		// Create Gin router without default middleware
 		r := gin.New()
+		_ = r.SetTrustedProxies(nil)
 
 		// Add custom logging middleware
 		r.Use(requestLogger())
