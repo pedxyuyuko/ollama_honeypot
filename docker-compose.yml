@@ -6,8 +6,8 @@ services:
     ports:
       - "11434:11434"
     volumes:
-      - ./mock:/app/mock
-      - ./logs:/app/logs
+      - ./mock:/root/mock
+      - ./logs:/root/logs
     env_file:
       - .env
       
