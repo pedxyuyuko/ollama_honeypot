@@ -26,6 +26,8 @@ The project is in the initial setup phase. The basic structure is in place with 
 - Added second logger for auditing with configurable log path, supporting text output to console and JSON output to file.
 - Added CLI flag --log-path and environment variable LOG_PATH for audit log file path.
 - Updated .example.env to include LOG_PATH and DEBUG environment variables.
+- Implemented `GET /v1/models` endpoint to mimic OpenAI's models listing API.
+- Implemented `POST /v1/chat/completions` and `POST /chat/completions` endpoints to mimic OpenAI's chat completions API with streaming support.
 
 ## Next Steps
 1.  Add configuration support (env vars/flags) for port and logging options.

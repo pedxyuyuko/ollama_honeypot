@@ -115,6 +115,12 @@ var Serve = &cobra.Command{
 
 		r.POST("/api/chat", api.ChatHandler)
 
+		r.GET("/v1/models", api.OpenAIModelsHandler)
+		r.POST("/v1/chat/completions", api.OpenAIChatHandler)
+
+		r.GET("/models", api.OpenAIModelsHandler)
+		r.POST("/chat/completions", api.OpenAIChatHandler)
+
 		// Handle shutdown signals
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
