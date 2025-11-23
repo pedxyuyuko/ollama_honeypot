@@ -1,6 +1,7 @@
 package api
 
 import (
+	"math/rand"
 	"strings"
 	"time"
 
@@ -53,7 +54,15 @@ func ChatHandler(c *gin.Context) {
 			}
 
 			// Fake response text
-			fakeText := "This is a simulated chat response from the Ollama honeypot. Your last message was: \"" + lastUserMessage + "\". This conversation is fake and intended for security monitoring purposes."
+			var fakeText string
+			if len(Responses) == 0 {
+				fakeText = "No responses loaded."
+			} else {
+				idx := rand.Intn(len(Responses))
+				resp := Responses[idx]
+				repeat := resp.RepeatMin + rand.Intn(resp.RepeatMax-resp.RepeatMin+1)
+				fakeText = strings.Repeat(resp.Text, repeat)
+			}
 
 			// Split into chunks
 			chunks := splitIntoChunks(fakeText, 20) // 20 char chunks
@@ -72,17 +81,18 @@ func ChatHandler(c *gin.Context) {
 			}
 
 			// Final message
+			loadDuration := int64(rand.Intn(9000000) + 1000000)
 			totalDuration := time.Since(startTime).Nanoseconds()
 			ch <- map[string]interface{}{
 				"model":                fullModel,
 				"created_at":           time.Now().Format(time.RFC3339),
 				"done":                 true,
 				"total_duration":       totalDuration,
-				"load_duration":        1000000, // fake
+				"load_duration":        loadDuration, // fake
 				"prompt_eval_count":    len(lastUserMessage),
 				"prompt_eval_duration": 200000000, // fake
 				"eval_count":           len(fakeText),
-				"eval_duration":        totalDuration - 1000000 - 200000000,
+				"eval_duration":        totalDuration - loadDuration - 200000000,
 			}
 		}()
 		return ch

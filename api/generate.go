@@ -1,6 +1,7 @@
 package api
 
 import (
+	"math/rand"
 	"strings"
 	"time"
 
@@ -43,6 +44,32 @@ func GenerateHandler(c *gin.Context) {
 		return
 	}
 
+	// Check if prompt is empty
+	if strings.TrimSpace(req.Prompt) == "" {
+		// Stream empty response
+		streamNDJSON(c, func() <-chan map[string]interface{} {
+			ch := make(chan map[string]interface{})
+			go func() {
+				defer close(ch)
+				startTime := time.Now()
+				loadDuration := int64(rand.Intn(9000000) + 1000000)
+				totalDuration := time.Since(startTime).Nanoseconds()
+				ch <- map[string]interface{}{
+					"model":             fullModel,
+					"created_at":        time.Now().Format(time.RFC3339),
+					"done":              true,
+					"total_duration":    totalDuration,
+					"load_duration":     loadDuration,
+					"prompt_eval_count": 0,
+					"eval_count":        0,
+					"eval_duration":     totalDuration - loadDuration,
+				}
+			}()
+			return ch
+		})
+		return
+	}
+
 	// Stream fake response
 	streamNDJSON(c, func() <-chan map[string]interface{} {
 		ch := make(chan map[string]interface{})
@@ -51,7 +78,15 @@ func GenerateHandler(c *gin.Context) {
 			startTime := time.Now()
 
 			// Fake response text
-			fakeText := "This is a simulated response from the Ollama honeypot. Your prompt was: \"" + req.Prompt + "\". This text generation is fake and intended for security monitoring purposes."
+			var fakeText string
+			if len(Responses) == 0 {
+				fakeText = "No responses loaded."
+			} else {
+				idx := rand.Intn(len(Responses))
+				resp := Responses[idx]
+				repeat := resp.RepeatMin + rand.Intn(resp.RepeatMax-resp.RepeatMin+1)
+				fakeText = strings.Repeat(resp.Text, repeat)
+			}
 
 			// Split into chunks
 			chunks := splitIntoChunks(fakeText, 20) // 20 char chunks
@@ -67,16 +102,17 @@ func GenerateHandler(c *gin.Context) {
 			}
 
 			// Final message
+			loadDuration := int64(rand.Intn(9000000) + 1000000)
 			totalDuration := time.Since(startTime).Nanoseconds()
 			ch <- map[string]interface{}{
 				"model":             fullModel,
 				"created_at":        time.Now().Format(time.RFC3339),
 				"done":              true,
 				"total_duration":    totalDuration,
-				"load_duration":     1000000, // fake
+				"load_duration":     loadDuration, // fake
 				"prompt_eval_count": len(req.Prompt),
 				"eval_count":        len(fakeText),
-				"eval_duration":     totalDuration - 1000000,
+				"eval_duration":     totalDuration - loadDuration,
 			}
 		}()
 		return ch

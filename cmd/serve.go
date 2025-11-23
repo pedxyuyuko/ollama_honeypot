@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
@@ -76,6 +77,12 @@ var Serve = &cobra.Command{
 		if err := api.LoadModels(); err != nil {
 			log.Printf("Failed to load models: %v", err)
 		}
+
+		if err := api.LoadResponses(); err != nil {
+			log.Printf("Failed to load responses: %v", err)
+		}
+
+		rand.Seed(time.Now().UnixNano())
 
 		// Set up logrus for JSON structured logging
 		logrus.SetFormatter(&logrus.JSONFormatter{})

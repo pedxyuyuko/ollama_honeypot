@@ -1,0 +1,27 @@
+[
+    {
+        "text": "This is a simulated response from the Ollama honeypot.",
+        "repeat_min": 1,
+        "repeat_max": 3
+    },
+    {
+        "text": "Fake text generation for security monitoring purposes.",
+        "repeat_min": 2,
+        "repeat_max": 4
+    },
+    {
+        "text": "Honeypot alert: unauthorized access detected.",
+        "repeat_min": 1,
+        "repeat_max": 2
+    },
+    {
+        "text": "Your request has been logged for analysis.",
+        "repeat_min": 1,
+        "repeat_max": 3
+    },
+    {
+        "text": "This is not a real Ollama response.",
+        "repeat_min": 1,
+        "repeat_max": 2
+    }
+]

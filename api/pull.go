@@ -122,7 +122,7 @@ func fetchBlob(repo, digest string) ([]byte, error) {
 	if err != nil || resp.StatusCode != 200 {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	return io.ReadAll(resp.Body)
 }
 

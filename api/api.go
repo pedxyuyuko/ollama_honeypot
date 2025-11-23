@@ -41,6 +41,23 @@ type Model struct {
 
 var Models = make(map[string]Model)
 
+type Response struct {
+	Text      string `json:"text"`
+	RepeatMin int    `json:"repeat_min"`
+	RepeatMax int    `json:"repeat_max"`
+}
+
+var Responses []Response
+
+func LoadResponses() error {
+	file, err := os.Open(MockPath + "/response.json")
+	if err != nil {
+		return err
+	}
+	defer func() { _ = file.Close() }()
+	return json.NewDecoder(file).Decode(&Responses)
+}
+
 func LoadModels() error {
 	file, err := os.Open(MockPath + "/tags.json")
 	if err != nil {
@@ -50,7 +67,7 @@ func LoadModels() error {
 		}
 		return err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	var data struct {
 		Models []Model `json:"models"`
 	}
@@ -75,7 +92,7 @@ func SaveModels() error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "    ")
 	return encoder.Encode(data)
