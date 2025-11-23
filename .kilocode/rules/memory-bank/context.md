@@ -22,6 +22,7 @@ The project is in the initial setup phase. The basic structure is in place with 
 - Implemented `DELETE /api/delete` endpoint to mimic model deletion.
 - Implemented `POST /api/generate` endpoint to mimic text generation with streaming NDJSON responses.
 - Implemented `POST /api/chat` endpoint to mimic chat completion.
+- Implemented `GET /api/ps` endpoint to mimic running model status listing.
 
 ## Next Steps
 1.  Add configuration support (env vars/flags) for port and logging options.

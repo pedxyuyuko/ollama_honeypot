@@ -84,8 +84,13 @@ var Serve = &cobra.Command{
 		// Set up logrus for JSON structured logging
 		logrus.SetFormatter(&logrus.JSONFormatter{})
 
+		if os.Getenv("DEBUG") == "" || os.Getenv("DEBUG") == "0" {
+			gin.SetMode(gin.ReleaseMode)
+		}
+
 		// Create Gin router without default middleware
 		r := gin.New()
+
 		_ = r.SetTrustedProxies(nil)
 
 		// Add custom logging middleware
