@@ -10,8 +10,11 @@ import (
 )
 
 type GenerateRequest struct {
-	Model  string `json:"model"`
-	Prompt string `json:"prompt"`
+	Model   string         `json:"model"`
+	Prompt  string         `json:"prompt"`
+	Options map[string]any `json:"options"`
+	Think   string         `json:"think"`
+	Images  []string       `json:"images"`
 }
 
 func splitIntoChunks(s string, chunkSize int) []string {
@@ -43,6 +46,9 @@ func GenerateHandler(c *gin.Context) {
 		"ip":     c.ClientIP(),
 		"model":  fullModel,
 		"prompt": req.Prompt,
+		"option": req.Options,
+		"think":  req.Think,
+		"images": req.Images,
 	}).Info("generate")
 
 	// Check if model exists

@@ -35,7 +35,7 @@ func InitAuditLogger(logPath string) {
 	AuditLogger = logrus.New()
 	AuditLogger.SetFormatter(&logrus.TextFormatter{})
 	if logPath != "" {
-		file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		file, err := os.OpenFile(logPath+"/audit.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
 			log.Printf("Failed to open audit log file: %v", err)
 		} else {

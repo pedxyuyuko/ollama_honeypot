@@ -60,6 +60,12 @@ var Serve = &cobra.Command{
 		if auditLogPath == "" {
 			auditLogPath = os.Getenv("LOG_PATH")
 		}
+		// create path if not exist
+		if _, err := os.Stat(auditLogPath); os.IsNotExist(err) {
+			if err := os.MkdirAll(auditLogPath, 0755); err != nil {
+				log.Printf("Failed to create mock path: %v", err)
+			}
+		}
 
 		// Initialize audit logger
 		api.InitAuditLogger(auditLogPath)
