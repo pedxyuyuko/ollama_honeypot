@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  ollama_honeypot:
+    image: docker.io/uuz233/ollama_honeypot:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./mock:/app/mock
+      - ./logs:/app/logs
+    env_file:
+      - .env
+      
