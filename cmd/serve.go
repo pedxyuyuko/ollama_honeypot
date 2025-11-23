@@ -101,6 +101,8 @@ var Serve = &cobra.Command{
 
 		r.GET("/api/tags", api.TagsHandler)
 
+		r.GET("/api/ps", api.PsHandler)
+
 		r.POST("/api/pull", api.PullHandler)
 
 		r.DELETE("/api/delete", api.DeleteHandler)
