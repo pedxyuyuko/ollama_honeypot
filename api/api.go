@@ -45,6 +45,22 @@ func InitAuditLogger(logPath string) {
 	}
 }
 
+var HttpLogger *logrus.Logger
+
+func InitHttpLogger(logPath string) {
+	HttpLogger = logrus.New()
+	HttpLogger.SetFormatter(&logrus.TextFormatter{})
+	if logPath != "" {
+		file, err := os.OpenFile(logPath+"/http.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			log.Printf("Failed to open http log file: %v", err)
+		} else {
+			hook := &FileHook{file: file}
+			HttpLogger.AddHook(hook)
+		}
+	}
+}
+
 type RootFS struct {
 	Type    string   `json:"type"`
 	DiffIDs []string `json:"diff_ids"`

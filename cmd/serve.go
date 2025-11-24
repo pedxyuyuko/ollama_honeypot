@@ -44,7 +44,7 @@ func requestLogger() gin.HandlerFunc {
 		}
 
 		// Log incoming request details using structured logging
-		logrus.WithFields(fields).Info("Incoming HTTP request")
+		api.HttpLogger.WithFields(fields).Info("Incoming HTTP request")
 
 		c.Next()
 	}
@@ -91,6 +91,9 @@ var Serve = &cobra.Command{
 
 		// Initialize audit logger
 		api.InitAuditLogger(auditLogPath)
+
+		// Initialize HTTP logger
+		api.InitHttpLogger(auditLogPath)
 
 		if err := api.LoadModels(); err != nil {
 			log.Printf("Failed to load models: %v", err)

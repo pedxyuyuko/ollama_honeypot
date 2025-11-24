@@ -6,7 +6,8 @@ import (
 )
 
 type ShowRequest struct {
-	Name string `json:"name"`
+	Name  string `json:"name"`
+	Model string `json:"model"`
 }
 
 type ShowResponse struct {
@@ -24,6 +25,10 @@ func ShowHandler(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid request"})
 		return
+	}
+
+	if req.Name == "" {
+		req.Name = req.Model
 	}
 
 	AuditLogger.WithFields(logrus.Fields{
