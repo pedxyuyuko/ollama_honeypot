@@ -10,4 +10,5 @@ services:
       - ./logs:/root/logs
     env_file:
       - .env
-      
+    environment:
+      - TZ=America/New_York
