@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
@@ -17,12 +20,31 @@ import (
 // requestLogger is a Gin middleware for logging requests
 func requestLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Log using logrus
-		logrus.WithFields(logrus.Fields{
-			"ip":     c.ClientIP(),
-			"method": c.Request.Method,
-			"path":   c.Request.URL.Path,
-		}).Info("Http request")
+		fields := logrus.Fields{
+			"ip":        c.ClientIP(),
+			"method":    c.Request.Method,
+			"path":      c.Request.URL.Path,
+			"userAgent": c.GetHeader("User-Agent"),
+			"query":     c.Request.URL.RawQuery,
+		}
+
+		// Capture request body for methods that typically contain payloads
+		if strings.Contains("POST PUT PATCH", c.Request.Method) {
+			bodyBytes, err := io.ReadAll(c.Request.Body)
+			if err == nil {
+				// Restore the body for subsequent handlers
+				c.Request.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+				bodyStr := string(bodyBytes)
+				// Truncate large bodies to prevent log bloat
+				if len(bodyStr) > 1000 {
+					bodyStr = bodyStr[:1000] + "..."
+				}
+				fields["body"] = bodyStr
+			}
+		}
+
+		// Log incoming request details using structured logging
+		logrus.WithFields(fields).Info("Incoming HTTP request")
 
 		c.Next()
 	}
