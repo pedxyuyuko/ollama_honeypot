@@ -27,7 +27,8 @@ func ShowHandler(c *gin.Context) {
 	}
 
 	AuditLogger.WithFields(logrus.Fields{
-		"ip": c.ClientIP(),
+		"ip":    c.ClientIP(),
+		"model": req.Name,
 	}).Info("show")
 
 	model, exists := Models[req.Name]
